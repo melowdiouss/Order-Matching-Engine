@@ -106,6 +106,7 @@ public final class MatchingEngine {
 
         if (request.type() == OrderType.CANCEL) {
             handleCancel(request);
+            marketDataConsumer.accept(formatBookSnapshot(5));
             return List.of();
         }
 
@@ -133,9 +134,7 @@ public final class MatchingEngine {
         for (Trade trade : trades) {
             tradeConsumer.accept(trade);
         }
-        if (!trades.isEmpty()) {
-            marketDataConsumer.accept(formatBookSnapshot(5));
-        }
+        marketDataConsumer.accept(formatBookSnapshot(5));
 
         return trades;
     }

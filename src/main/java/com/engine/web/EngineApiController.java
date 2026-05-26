@@ -49,7 +49,7 @@ public final class EngineApiController {
     }
 
     @GetMapping("/book")
-    public Map<String, Object> book(@RequestParam(defaultValue = "10") int depth) {
+    public Map<String, Object> book(@RequestParam(name = "depth", defaultValue = "10") int depth) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("depth", Math.max(1, depth));
         payload.put("snapshot", eventStore.latestSnapshot());
@@ -57,7 +57,7 @@ public final class EngineApiController {
     }
 
     @GetMapping("/events")
-    public Map<String, List<String>> events(@RequestParam(defaultValue = "30") int limit) {
+    public Map<String, List<String>> events(@RequestParam(name = "limit", defaultValue = "30") int limit) {
         int safeLimit = Math.max(1, Math.min(limit, 200));
         return Map.of("events", eventStore.recentEvents(safeLimit));
     }
