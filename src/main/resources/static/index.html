@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Matching Engine UI</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="background-glow"></div>
+<main class="app-shell">
+    <header class="hero">
+        <h1>Order Matching Engine</h1>
+        <p>Submit orders, monitor trades, and inspect market snapshots in real time.</p>
+    </header>
+
+    <section class="grid-layout">
+        <article class="panel form-panel">
+            <h2>Submit Order</h2>
+            <form id="order-form" class="order-form">
+                <label>
+                    Type
+                    <select id="type" name="type">
+                        <option value="LIMIT" selected>LIMIT</option>
+                        <option value="MARKET">MARKET</option>
+                        <option value="CANCEL">CANCEL</option>
+                    </select>
+                </label>
+
+                <label>
+                    Order ID
+                    <input id="orderId" name="orderId" required placeholder="o-1001">
+                </label>
+
+                <label>
+                    User ID
+                    <input id="userId" name="userId" required placeholder="u-42">
+                </label>
+
+                <label id="side-group">
+                    Side
+                    <select id="side" name="side">
+                        <option value="BUY" selected>BUY</option>
+                        <option value="SELL">SELL</option>
+                    </select>
+                </label>
+
+                <label id="price-group">
+                    Price
+                    <input id="price" name="price" type="number" min="1" step="1" value="100">
+                </label>
+
+                <label id="quantity-group">
+                    Quantity
+                    <input id="quantity" name="quantity" type="number" min="1" step="1" value="10">
+                </label>
+
+                <button type="submit">Send Order</button>
+            </form>
+            <div id="submit-result" class="status-line" aria-live="polite"></div>
+        </article>
+
+        <article class="panel">
+            <div class="panel-head">
+                <h2>Order Book</h2>
+                <button id="refresh-book" class="ghost">Refresh</button>
+            </div>
+            <pre id="book-output" class="terminal"></pre>
+        </article>
+
+        <article class="panel panel-wide">
+            <div class="panel-head">
+                <h2>Recent Engine Events</h2>
+                <button id="refresh-events" class="ghost">Refresh</button>
+            </div>
+            <ul id="events-list" class="event-list"></ul>
+        </article>
+    </section>
+</main>
+<script src="/app.js" defer></script>
+</body>
+</html>

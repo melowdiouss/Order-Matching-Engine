@@ -1,51 +1,46 @@
 package com.engine;
 
 import com.engine.core.MatchingEngine;
-import com.engine.domain.CancelAck;
 import com.engine.domain.OrderRequest;
-import com.engine.domain.Trade;
-import com.engine.network.OrderGateway;
+import com.engine.web.EngineEventStore;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
-import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public final class Main {
-    private Main() {
-    }
+@SpringBootApplication
+public class Main {
 
     public static void main(String[] args) {
-        int port = args.length > 0 ? Integer.parseInt(args[0]) : 9090;
+        SpringApplication.run(Main.class, args);
+    }
 
-        ConcurrentLinkedQueue<OrderRequest> inboundQueue = new ConcurrentLinkedQueue<>();
-        MatchingEngine engine = new MatchingEngine(
+    @Bean
+    ConcurrentLinkedQueue<OrderRequest> inboundQueue() {
+        return new ConcurrentLinkedQueue<>();
+    }
+
+    @Bean
+    EngineEventStore engineEventStore() {
+        return new EngineEventStore(300);
+    }
+
+    @Bean
+    MatchingEngine matchingEngine(ConcurrentLinkedQueue<OrderRequest> inboundQueue, EngineEventStore eventStore) {
+        return new MatchingEngine(
                 inboundQueue,
-                Main::publishTrade,
-                Main::publishCancel,
-                System.out::println,
-                System.out::println,
+                eventStore::onTrade,
+                eventStore::onCancel,
+                eventStore::onLog,
+                eventStore::onMarketData,
                 50_000L
         );
-
-        Thread engineThread = Thread.ofPlatform().name("matching-engine-loop").start(engine::runLoop);
-
-        try (OrderGateway gateway = new OrderGateway(port, inboundQueue)) {
-            System.out.println("OrderGateway started on port " + port);
-            gateway.start();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to start gateway", e);
-        } finally {
-            engine.stop();
-            engineThread.interrupt();
-        }
     }
 
-    private static void publishTrade(Trade trade) {
-        System.out.printf("TRADE resting=%s incoming=%s price=%d qty=%d ts=%d%n",
-                trade.restingOrderId(), trade.incomingOrderId(), trade.price(), trade.quantity(), trade.timestampNanos());
-    }
-
-    private static void publishCancel(CancelAck cancelAck) {
-        System.out.printf("CANCEL order=%s success=%s reason=%s ts=%d%n",
-                cancelAck.orderId(), cancelAck.success(), cancelAck.reason(), cancelAck.timestampNanos());
+    @Bean
+    CommandLineRunner startupBanner() {
+        return args -> System.out.println("Open UI at http://localhost:8080");
     }
 }
